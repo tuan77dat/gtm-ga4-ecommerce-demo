@@ -13,8 +13,13 @@ export const FloatingDebugPanel: React.FC = () => {
   useEffect(() => {
     // Check initial consent status
     if ((window as any).gtmInterceptor) {
-      const state = (window as any).gtmInterceptor.getConsentState();
-      if (state.analytics_storage) {
+      const gtm = (window as any).gtmInterceptor;
+      const state = typeof gtm.getConsentState === 'function'
+        ? gtm.getConsentState()
+        : typeof gtm === 'function'
+        ? gtm('getConsentState')
+        : gtm.sdk?.getConsentState?.();
+      if (state && state.analytics_storage) {
         setConsentStatus(state.analytics_storage);
       }
     }

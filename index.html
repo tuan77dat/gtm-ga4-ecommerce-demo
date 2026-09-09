@@ -2,36 +2,36 @@
 <html lang="en" class="dark">
   <head>
     <!-- ==================================================================== -->
-    <!-- GTM INTERCEPTOR SDK INTEGRATION (METHOD C: STATIC IIFE BUNDLE)       -->
-    <!-- MUST load BEFORE the GTM snippet so the interceptor attaches to      -->
-    <!-- window.dataLayer prior to GTM's initial push calls. This ensures      -->
-    <!-- even the earliest lifecycle events (like 'gtm.js') are intercepted,   -->
-    <!-- normalized, and chained downstream to GTM without disruption.        -->
+    <!-- GTM INTERCEPTOR SDK INTEGRATION (2-HOP ASYNC CDN SNIPPET)            -->
+    <!-- Positioned BEFORE the GTM snippet so the command queue stub is ready -->
+    <!-- to intercept dataLayer pushes as soon as GTM starts executing.       -->
     <!-- ==================================================================== -->
-    <script src="/gtm-interceptor.iife.js"></script>
     <script>
       window.__interceptorLogs = window.__interceptorLogs || [];
-      if (window.GtmInterceptorSDK) {
-        window.gtmInterceptor = GtmInterceptorSDK.init({
-          dataLayerName: 'dataLayer',
-          requiredConsentKey: 'analytics_storage',
-          assumeGrantedUntilSet: true,
-          onEvent: function(event, status) {
-            var entry = { event: event, status: status, timestamp: new Date().toISOString() };
-            window.__interceptorLogs.push(entry);
-            console.log(
-              '%c [SDK Interceptor: ' + status.toUpperCase() + '] %c ' + event.name,
-              'background: ' + (status === 'forwarded' ? '#10b981' : status === 'queued' ? '#f59e0b' : '#8b5cf6') + '; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;',
-              'font-weight: bold; color: #38bdf8;',
-              event.payload
-            );
-          },
-          onConsentChange: function(state) {
-            console.log('%c [SDK Interceptor: Consent State Changed] ', 'background: #3b82f6; color: white; padding: 2px 5px; border-radius: 3px;', state);
-          }
-        });
-        console.log('%c ⚡ GTM Interceptor SDK attached BEFORE GTM snippet via static IIFE bundle %c', 'background: #4338ca; color: white; font-weight: bold; padding: 3px 6px; border-radius: 4px;', '');
-      }
+      (function(w,d,s,u,id,opt){
+        w.gtmInterceptor=w.gtmInterceptor||function(){(w.gtmInterceptor.q=w.gtmInterceptor.q||[]).push(arguments)};
+        w.gtmInterceptor.l=1*new Date();w.gtmInterceptor.siteId=id;
+        if(id)w.gtmInterceptor('init',Object.assign({siteId:id},opt||{}));
+        var f=d.getElementsByTagName(s)[0],j=d.createElement(s);
+        j.async=true;j.src=u;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','https://gtm-interceptor-sdk.vercel.app/v1/sdk.js','demo-site-01',{
+        dataLayerName: 'dataLayer',
+        requiredConsentKey: 'analytics_storage',
+        assumeGrantedUntilSet: true,
+        onEvent: function(event, status) {
+          var entry = { event: event, status: status, timestamp: new Date().toISOString() };
+          window.__interceptorLogs.push(entry);
+          console.log(
+            '%c [SDK Interceptor: ' + status.toUpperCase() + '] %c ' + event.name,
+            'background: ' + (status === 'forwarded' ? '#10b981' : status === 'queued' ? '#f59e0b' : '#8b5cf6') + '; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;',
+            'font-weight: bold; color: #38bdf8;',
+            event.payload
+          );
+        },
+        onConsentChange: function(state) {
+          console.log('%c [SDK Interceptor: Consent State Changed] ', 'background: #3b82f6; color: white; padding: 2px 5px; border-radius: 3px;', state);
+        }
+      });
 
       // Dev helpers for testing consent gating and queue flushing
       window.simulateConsentDenial = function() {
