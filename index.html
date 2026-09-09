@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <!-- ==================================================================== -->
+    <!-- GTM INTERCEPTOR SDK INTEGRATION (METHOD C: STATIC IIFE BUNDLE)       -->
+    <!-- MUST load BEFORE the GTM snippet so the interceptor attaches to      -->
+    <!-- window.dataLayer prior to GTM's initial push calls. This ensures      -->
+    <!-- even the earliest lifecycle events (like 'gtm.js') are intercepted,   -->
+    <!-- normalized, and chained downstream to GTM without disruption.        -->
+    <!-- ==================================================================== -->
+    <script src="/gtm-interceptor.iife.js"></script>
+    <script>
+      window.__interceptorLogs = window.__interceptorLogs || [];
+      if (window.GtmInterceptorSDK) {
+        window.gtmInterceptor = GtmInterceptorSDK.init({
+          dataLayerName: 'dataLayer',
+          requiredConsentKey: 'analytics_storage',
+          assumeGrantedUntilSet: true,
+          onEvent: function(event, status) {
+            var entry = { event: event, status: status, timestamp: new Date().toISOString() };
+            window.__interceptorLogs.push(entry);
+            console.log(
+              '%c [SDK Interceptor: ' + status.toUpperCase() + '] %c ' + event.name,
+              'background: ' + (status === 'forwarded' ? '#10b981' : status === 'queued' ? '#f59e0b' : '#8b5cf6') + '; color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px;',
+              'font-weight: bold; color: #38bdf8;',
+              event.payload
+            );
+          },
+          onConsentChange: function(state) {
+            console.log('%c [SDK Interceptor: Consent State Changed] ', 'background: #3b82f6; color: white; padding: 2px 5px; border-radius: 3px;', state);
+          }
+        });
+        console.log('%c ⚡ GTM Interceptor SDK attached BEFORE GTM snippet via static IIFE bundle %c', 'background: #4338ca; color: white; font-weight: bold; padding: 3px 6px; border-radius: 4px;', '');
+      }
+
+      // Dev helpers for testing consent gating and queue flushing
+      window.simulateConsentDenial = function() {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(['consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied' }]);
+        console.log('%c 🔒 [Consent Mode Helper] analytics_storage set to DENIED', 'background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px;');
+      };
+
+      window.simulateConsentGrant = function() {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(['consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted' }]);
+        console.log('%c 🔓 [Consent Mode Helper] analytics_storage set to GRANTED (Queue will flush)', 'background: #10b981; color: white; padding: 2px 6px; border-radius: 4px;');
+      };
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KB5PV3ZB');</script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛍️</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GTM & GA4 E-Commerce Tracking Demo</title>
+    
+    <!-- Tailwind CSS CDN for instant responsive rendering -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                850: '#151f32'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500 selection:text-white">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KB5PV3ZB"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
